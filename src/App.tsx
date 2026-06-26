@@ -105,6 +105,7 @@ function App() {
             <li><a href="#que-es" className="nav-link">¿Qué es Phonics?</a></li>
             <li><a href="#sandbox" className="nav-link">Demo Interactiva</a></li>
             <li><a href="#features" className="nav-link">Características</a></li>
+            <li><a href="#team" className="nav-link">Quiénes Somos</a></li>
           </ul>
           <a href="#sandbox" className="btn btn-secondary">Probar Sandbox</a>
         </div>
@@ -341,6 +342,31 @@ function App() {
         </div>
       </section>
 
+      {/* Team Section */}
+      <section id="team" className="info-section container" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '80px' }}>
+        <div className="section-header">
+          <div className="badge">El Equipo</div>
+          <h2>¿Quiénes Somos?</h2>
+          <p>
+            Los creadores detrás de Teacher Phonics, trabajando para facilitar la enseñanza y el aprendizaje de la fonética.
+          </p>
+        </div>
+
+        <div className="grid-cards" style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div className="card-glass info-card" style={{ textAlign: 'center' }}>
+            <div className="card-icon bg-purple-light" style={{ margin: '0 auto 24px auto' }}>👨‍💻</div>
+            <h3 className="card-title">Adrián Arribas</h3>
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Co-fundador y Desarrollador</p>
+          </div>
+
+          <div className="card-glass info-card" style={{ textAlign: 'center' }}>
+            <div className="card-icon bg-mint-light" style={{ margin: '0 auto 24px auto' }}>👨‍💻</div>
+            <h3 className="card-title">Javier Razquin</h3>
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Co-fundador y Desarrollador</p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="cta-banner container">
         <div className="cta-card">
@@ -365,6 +391,7 @@ function App() {
             <a href="#que-es">¿Qué es?</a>
             <a href="#sandbox">Sandbox</a>
             <a href="#features">Características</a>
+            <a href="#team">Quiénes Somos</a>
           </div>
         </div>
       </footer>
