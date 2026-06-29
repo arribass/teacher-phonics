@@ -367,6 +367,11 @@ p {
   grid-template-columns: 1.25fr 0.75fr;
   gap: 32px;
   align-items: start;
+  transition: all var(--transition-normal);
+}
+
+.sandbox-workspace.hide-sheet {
+  grid-template-columns: 1fr;
 }
 
 .workspace-editor {
@@ -403,6 +408,45 @@ p {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.slate-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-toggle-sheet {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-toggle-sheet:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-toggle-sheet.active {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+}
+
+.btn-toggle-sheet.active:hover {
+  background: rgba(99, 102, 241, 0.3);
+  color: #ffffff;
 }
 
 .slate-title {
@@ -948,6 +992,26 @@ p {
   text-transform: uppercase;
 }
 
+.sheet-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheet-close-btn:hover {
+  color: #ef4444;
+  transform: scale(1.15);
+}
+
 .sheet-intro {
   font-size: 0.85rem;
   color: var(--text-muted);
@@ -1108,6 +1172,8 @@ p {
   font-size: 0.75rem;
   color: var(--text-light);
   text-align: center;
+  width: 100%;
+  margin-top: 16px;
 }
 
 /* Responsive Customization */

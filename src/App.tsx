@@ -44,6 +44,7 @@ function App() {
   const [activeSpellingIndex, setActiveSpellingIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const [showPhonicsSheet, setShowPhonicsSheet] = useState<boolean>(true);
 
   // Voice synthesis helper
   const speak = (text: string, rate = 1.0): Promise<void> => {
@@ -221,7 +222,7 @@ function App() {
       {/* Writing Sandbox Section */}
       <section id="sandbox" className="sandbox-section">
         <div className="container">
-          <div className="sandbox-workspace">
+          <div className={`sandbox-workspace ${!showPhonicsSheet ? 'hide-sheet' : ''}`}>
             
             {/* Left Column: Slate Workshop */}
             <div className="workspace-editor">
@@ -230,8 +231,17 @@ function App() {
                 {/* Display / Slate */}
                 <div className="slate-container">
                   <div className="slate-header">
-                    <span className="slate-title">Mi Pizarra de Escritura</span>
-                    <span className="slate-subtitle">Presiona las letras para oír su sonido</span>
+                    <div className="slate-header-left">
+                      <span className="slate-title">Mi Pizarra de Escritura</span>
+                      <span className="slate-subtitle">Presiona las letras para oír su sonido</span>
+                    </div>
+                    <button
+                      className={`btn-toggle-sheet ${showPhonicsSheet ? 'active' : ''}`}
+                      onClick={() => setShowPhonicsSheet(!showPhonicsSheet)}
+                      title={showPhonicsSheet ? 'Ocultar Ficha de Referencia' : 'Mostrar Ficha de Referencia'}
+                    >
+                      📋 {showPhonicsSheet ? 'Ocultar Ficha' : 'Ver Ficha'}
+                    </button>
                   </div>
 
                   <div className="slate-content">
@@ -405,54 +415,63 @@ function App() {
             </div>
 
             {/* Right Column: Classroom Phonics Sheet */}
-            <div className="workspace-sheet">
-              <div className="phonics-sheet card-glass">
-                <div className="sheet-header">
-                  <span className="sheet-pin">📌</span>
-                  <div className="sheet-title-group">
-                    <h3 className="sheet-title">Ficha de Phonics</h3>
-                    <span className="sheet-subtitle">Sonidos Activos de la Demo</span>
-                  </div>
-                  <span className="sheet-level-badge">Fase 1 (es)</span>
-                </div>
-                
-                <div className="sheet-body">
-                  <p className="sheet-intro">
-                    Esta es tu hoja de referencia actual. Haz clic en cualquier fonema para escuchar su sonido individual.
-                  </p>
-                  
-                  <div className="sheet-grid">
-                    {Object.values(PHONIC_MAP).map((phonic) => {
-                      const isVoc = VOCALES.includes(phonic.letter);
-                      return (
-                        <button
-                          key={phonic.letter}
-                          className={`sheet-card ${phonic.colorClass}`}
-                          onClick={() => !isPlaying && speakLetter(phonic.letter)}
-                          disabled={isPlaying}
-                          title={`Reproducir fonema /${phonic.letter.toLowerCase()}/`}
-                        >
-                          <div className="sheet-card-top">
-                            <span className={`sheet-letter ${isVoc ? 'txt-vocal' : 'txt-consonant'}`}>
-                              {phonic.letter}
-                            </span>
-                            <span className="sheet-ipa">{phonic.ipa}</span>
-                          </div>
-                          <span className="sheet-image">{phonic.image}</span>
-                          <span className="sheet-word">{phonic.word}</span>
-                        </button>
-                      );
-                    })}
+            {showPhonicsSheet && (
+              <div className="workspace-sheet">
+                <div className="phonics-sheet card-glass">
+                  <div className="sheet-header">
+                    <span className="sheet-pin">📌</span>
+                    <div className="sheet-title-group">
+                      <h3 className="sheet-title">Ficha de Phonics</h3>
+                      <span className="sheet-subtitle">Sonidos Activos de la Demo</span>
+                    </div>
+                    <span className="sheet-level-badge">Fase 1 (es)</span>
+                    <button 
+                      className="sheet-close-btn"
+                      onClick={() => setShowPhonicsSheet(false)}
+                      title="Ocultar Ficha de Phonics"
+                    >
+                      ✕
+                    </button>
                   </div>
                   
-                  <div className="sheet-footer">
-                    <p className="sheet-note">
-                      ✍️ <em>Escribe palabras combinando estos sonidos (ej: sopa, mapa, lupa, pato).</em>
+                  <div className="sheet-body">
+                    <p className="sheet-intro">
+                      Esta es tu hoja de referencia actual. Haz clic en cualquier fonema para escuchar su sonido individual.
                     </p>
+                    
+                    <div className="sheet-grid">
+                      {Object.values(PHONIC_MAP).map((phonic) => {
+                        const isVoc = VOCALES.includes(phonic.letter);
+                        return (
+                          <button
+                            key={phonic.letter}
+                            className={`sheet-card ${phonic.colorClass}`}
+                            onClick={() => !isPlaying && speakLetter(phonic.letter)}
+                            disabled={isPlaying}
+                            title={`Reproducir fonema /${phonic.letter.toLowerCase()}/`}
+                          >
+                            <div className="sheet-card-top">
+                              <span className={`sheet-letter ${isVoc ? 'txt-vocal' : 'txt-consonant'}`}>
+                                {phonic.letter}
+                              </span>
+                              <span className="sheet-ipa">{phonic.ipa}</span>
+                            </div>
+                            <span className="sheet-image">{phonic.image}</span>
+                            <span className="sheet-word">{phonic.word}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="sheet-footer">
+                      <p className="sheet-note">
+                        ✍️ <em>Escribe palabras combinando estos sonidos (ej: sopa, mapa, lupa, pato).</em>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
           </div>
         </div>
