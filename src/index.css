@@ -1041,23 +1041,30 @@ p {
 
 /* Footer Styles */
 .footer {
-  padding: 60px 0 40px 0;
+  padding: 24px 0;
   background-color: #ffffff;
   border-top: 1px solid var(--border-color);
-  text-align: center;
 }
 
 .footer-content {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+.footer-row-main {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 14px;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .footer-logo {
   font-family: var(--font-heading);
   font-weight: 800;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
 }
 
 .footer-logo span {
@@ -1066,47 +1073,41 @@ p {
   -webkit-text-fill-color: transparent;
 }
 
-.footer-text {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-}
-
 .footer-credits {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
 }
 
-.footer-coffee-wrapper {
-  margin: 8px 0;
-}
-
-/* Buy Me a Coffee Footer button */
-.btn-coffee-footer {
+/* Buy Me a Coffee Footer Icon Button */
+.btn-coffee-footer-icon {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   background-color: #FFDD00;
-  color: #000000;
-  font-family: 'Outfit', sans-serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-  padding: 10px 20px;
-  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(255, 221, 0, 0.2);
-  transition: all var(--transition-normal);
+  font-size: 1.1rem;
+  box-shadow: 0 4px 10px rgba(255, 221, 0, 0.25);
+  transition: all var(--transition-bounce);
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.btn-coffee-footer:hover {
+.btn-coffee-footer-icon:hover {
   background-color: #ffea33;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 221, 0, 0.35);
+  transform: translateY(-2px) scale(1.08);
+  box-shadow: 0 6px 14px rgba(255, 221, 0, 0.4);
+}
+
+.btn-coffee-footer-icon:active {
+  transform: translateY(0) scale(1);
 }
 
 .footer-copy {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-light);
+  text-align: center;
 }
 
 /* Responsive Customization */

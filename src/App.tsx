@@ -461,23 +461,21 @@ function App() {
       {/* Footer */}
       <footer className="footer">
         <div className="container footer-content">
-          <div className="footer-logo">
-            🍎 <span>TeacherPhonics</span>
-          </div>
-          <p className="footer-text">
-            Una pizarra interactiva creada para aprender a leer y escribir en español.
-          </p>
-          <p className="footer-credits">
-            Desarrollado por <strong>Adrián Arribas</strong> y <strong>Javier Razquin</strong>.
-          </p>
-          <div className="footer-coffee-wrapper">
+          <div className="footer-row-main">
+            <div className="footer-logo">
+              🍎 <span>TeacherPhonics</span>
+            </div>
+            <p className="footer-credits">
+              Desarrollado por <strong>Adrián Arribas</strong> y <strong>Javier Razquin</strong>.
+            </p>
             <a 
               href="https://www.buymeacoffee.com/" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="btn-coffee-footer"
+              className="btn-coffee-footer-icon"
+              title="Apoya nuestro proyecto en Buy Me a Coffee ☕"
             >
-              ☕ Apoya nuestro proyecto en Buy Me a Coffee
+              ☕
             </a>
           </div>
           <p className="footer-copy">
