@@ -221,7 +221,7 @@ function App() {
 
       {/* Writing Sandbox Section */}
       <section id="sandbox" className="sandbox-section">
-        <div className="container">
+        <div className={`container ${showPhonicsSheet ? 'container-wide' : ''}`}>
           <div className={`sandbox-workspace ${!showPhonicsSheet ? 'hide-sheet' : ''}`}>
             
             {/* Left Column: Slate Workshop */}
