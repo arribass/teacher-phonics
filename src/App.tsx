@@ -1,7 +1,27 @@
 import { useState, useEffect } from 'react';
 
+interface PhonicDetail {
+  letter: string;
+  word: string;
+  image: string;
+  colorClass: string;
+}
+
 const VOCALES = ['A', 'E', 'I', 'O', 'U'];
 const CONSONANTES = ['M', 'P', 'S', 'L', 'T'];
+
+const PHONIC_MAP: Record<string, PhonicDetail> = {
+  A: { letter: 'A', word: 'avión', image: '✈️', colorClass: 'gradient-sky' },
+  E: { letter: 'E', word: 'estrella', image: '⭐', colorClass: 'gradient-yellow' },
+  I: { letter: 'I', word: 'isla', image: '🏝️', colorClass: 'gradient-teal' },
+  O: { letter: 'O', word: 'ojo', image: '👁️', colorClass: 'gradient-slate' },
+  U: { letter: 'U', word: 'uvas', image: '🍇', colorClass: 'gradient-purple' },
+  M: { letter: 'M', word: 'mano', image: '✋', colorClass: 'gradient-peach' },
+  P: { letter: 'P', word: 'pato', image: '🦆', colorClass: 'gradient-amber' },
+  S: { letter: 'S', word: 'sol', image: '☀️', colorClass: 'gradient-orange' },
+  L: { letter: 'L', word: 'luna', image: '🌙', colorClass: 'gradient-blue' },
+  T: { letter: 'T', word: 'taza', image: '☕', colorClass: 'gradient-brown' }
+};
 
 const PHONETIC_SOUNDS: Record<string, string> = {
   A: 'a',
@@ -215,22 +235,47 @@ function App() {
                     <span>Escribe algo usando el teclado de abajo o tu teclado físico...</span>
                   </div>
                 ) : (
-                  <div className="slate-letters">
-                    {currentWord.split('').map((letter, idx) => {
-                      const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
-                      return (
-                        <button
-                          key={idx}
-                          className={`letter-card ${isLetterActive ? 'active-spelling' : ''}`}
-                          onClick={() => !isPlaying && speakLetter(letter)}
-                          disabled={isPlaying}
-                          title={`Escuchar sonido de ${letter}`}
-                        >
-                          <span className="letter-char">{letter}</span>
-                          <span className="letter-audio-icon">🔊</span>
-                        </button>
-                      );
-                    })}
+                  <div className="slate-slate-wrap">
+                    {/* Letter cards */}
+                    <div className="slate-letters">
+                      {currentWord.split('').map((letter, idx) => {
+                        const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
+                        return (
+                          <button
+                            key={idx}
+                            className={`letter-card ${isLetterActive ? 'active-spelling' : ''}`}
+                            onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
+                            disabled={isPlaying}
+                            title={`Escuchar sonido de ${letter}`}
+                          >
+                            <span className="letter-char">{letter}</span>
+                            <span className="letter-audio-icon">🔊</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Phonic Images Row */}
+                    <div className="slate-images-row">
+                      {currentWord.split('').map((letter, idx) => {
+                        const phonic = PHONIC_MAP[letter.toUpperCase()];
+                        if (!phonic) return null;
+                        const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
+                        return (
+                          <button
+                            key={idx}
+                            className={`phonic-image-card ${phonic.colorClass} ${isLetterActive ? 'active-spelling' : ''}`}
+                            onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
+                            disabled={isPlaying}
+                            title={`${letter.toUpperCase()} de ${phonic.word}`}
+                          >
+                            <span className="phonic-symbol">{phonic.image}</span>
+                            <span className="phonic-word-label">{phonic.word}</span>
+                            <span className="phonic-association">{letter.toLowerCase()}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
@@ -290,16 +335,20 @@ function App() {
               <div className="keyboard-row-wrapper">
                 <span className="row-label vocal-label">Vocales:</span>
                 <div className="keyboard-row">
-                  {VOCALES.map((letter) => (
-                    <button
-                      key={letter}
-                      className="key-btn key-vowel"
-                      onClick={() => handleKeyPress(letter)}
-                      disabled={isPlaying}
-                    >
-                      {letter}
-                    </button>
-                  ))}
+                  {VOCALES.map((letter) => {
+                    const phonic = PHONIC_MAP[letter];
+                    return (
+                      <button
+                        key={letter}
+                        className="key-btn key-vowel"
+                        onClick={() => handleKeyPress(letter)}
+                        disabled={isPlaying}
+                      >
+                        <span className="key-letter">{letter}</span>
+                        <span className="key-symbol">{phonic?.image}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -307,16 +356,20 @@ function App() {
               <div className="keyboard-row-wrapper" style={{ marginTop: '16px' }}>
                 <span className="row-label consonant-label">Consonantes:</span>
                 <div className="keyboard-row">
-                  {CONSONANTES.map((letter) => (
-                    <button
-                      key={letter}
-                      className="key-btn key-consonant"
-                      onClick={() => handleKeyPress(letter)}
-                      disabled={isPlaying}
-                    >
-                      {letter}
-                    </button>
-                  ))}
+                  {CONSONANTES.map((letter) => {
+                    const phonic = PHONIC_MAP[letter];
+                    return (
+                      <button
+                        key={letter}
+                        className="key-btn key-consonant"
+                        onClick={() => handleKeyPress(letter)}
+                        disabled={isPlaying}
+                      >
+                        <span className="key-letter">{letter}</span>
+                        <span className="key-symbol">{phonic?.image}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

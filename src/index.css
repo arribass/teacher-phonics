@@ -18,7 +18,7 @@
   --secondary-light: hsl(var(--secondary-hue), 85%, 95%);
   --secondary-gradient: linear-gradient(135deg, hsl(var(--secondary-hue), 80%, 45%) 0%, hsl(180, 80%, 40%) 100%);
   
-  --accent: hsl(35, 100%, 55%); /* Warm orange for vowels & key highlights */
+  --accent: hsl(35, 100%, 55%);
   --accent-light: hsl(35, 100%, 95%);
   --accent-dark: hsl(35, 100%, 40%);
   
@@ -408,11 +408,11 @@ p {
 }
 
 .slate-content {
-  min-height: 180px;
+  min-height: 280px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 28px;
   background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
 }
 
@@ -421,6 +421,14 @@ p {
   font-size: 1rem;
   text-align: center;
   font-style: italic;
+}
+
+.slate-slate-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
 }
 
 .slate-letters {
@@ -495,6 +503,119 @@ p {
 .letter-card.active-spelling .letter-audio-icon {
   color: rgba(255,255,255,0.8);
   opacity: 1;
+}
+
+/* Phonics Associated Image Cards Row */
+.slate-images-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-top: 24px;
+}
+
+.phonic-image-card {
+  border: 3px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  width: 70px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: all var(--transition-bounce);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.phonic-image-card:hover {
+  transform: translateY(-5px) scale(1.04);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+}
+
+.phonic-image-card:disabled {
+  cursor: default;
+}
+
+.phonic-symbol {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.phonic-word-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #334155;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.phonic-association {
+  font-size: 0.75rem;
+  font-weight: 800;
+  opacity: 0.4;
+  color: #000000;
+}
+
+/* Active Highlight for Phonic Images */
+.phonic-image-card.active-spelling {
+  transform: scale(1.12);
+  box-shadow: var(--shadow-primary);
+  border-color: #ffffff;
+}
+
+.phonic-image-card.active-spelling .phonic-association {
+  opacity: 0.9;
+  color: #000000;
+}
+
+/* Phonics Gradients */
+.gradient-sky {
+  background: linear-gradient(135deg, #f0f9ff 0%, #bae6fd 100%);
+  border-color: #bae6fd;
+}
+.gradient-yellow {
+  background: linear-gradient(135deg, #fefce8 0%, #fef08a 100%);
+  border-color: #fef08a;
+}
+.gradient-teal {
+  background: linear-gradient(135deg, #f0fdf4 0%, #99f6e4 100%);
+  border-color: #99f6e4;
+}
+.gradient-slate {
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+  border-color: #cbd5e1;
+}
+.gradient-purple {
+  background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%);
+  border-color: #e9d5ff;
+}
+.gradient-peach {
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+  border-color: #fed7aa;
+}
+.gradient-amber {
+  background: linear-gradient(135deg, #fefaf0 0%, #fde68a 100%);
+  border-color: #fde68a;
+}
+.gradient-orange {
+  background: linear-gradient(135deg, #fffaf0 0%, #ffedd5 100%);
+  border-color: #ffedd5;
+}
+.gradient-blue {
+  background: linear-gradient(135deg, #f0f9ff 0%, #bae6fd 100%);
+  border-color: #bae6fd;
+}
+.gradient-brown {
+  background: linear-gradient(135deg, #fdf8f2 0%, #e3cbb3 100%);
+  border-color: #e3cbb3;
 }
 
 /* Floating Error popup */
@@ -621,21 +742,34 @@ p {
   justify-content: center;
 }
 
-/* Stylized Keyboard Key Buttons */
+/* Stylized Keyboard Key Buttons with Letter + Emoji */
 .key-btn {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 800;
-  width: 52px;
-  height: 52px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: #ffffff;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-bounce);
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  gap: 4px;
+  padding: 6px;
+}
+
+.key-letter {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.key-symbol {
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0.8;
 }
 
 .key-vowel {
@@ -816,11 +950,14 @@ p {
     padding: 6px 12px;
   }
   .btn-nav-demo {
-    display: none; /* Hide secondary nav button on small screens */
+    display: none;
   }
   .slate-content {
-    min-height: 140px;
+    min-height: 220px;
     padding: 16px;
+  }
+  .slate-slate-wrap {
+    gap: 20px;
   }
   .letter-card {
     width: 54px;
@@ -828,6 +965,20 @@ p {
   }
   .letter-char {
     font-size: 2.2rem;
+  }
+  .phonic-image-card {
+    width: 54px;
+    height: 72px;
+    padding: 4px 2px;
+  }
+  .phonic-symbol {
+    font-size: 1.4rem;
+  }
+  .phonic-word-label {
+    font-size: 0.5rem;
+  }
+  .phonic-association {
+    font-size: 0.65rem;
   }
   .slate-actions {
     flex-direction: column;
@@ -838,9 +989,16 @@ p {
     justify-content: space-between;
   }
   .key-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 1.3rem;
+    width: 52px;
+    height: 52px;
+    gap: 2px;
+    padding: 4px;
+  }
+  .key-letter {
+    font-size: 1.1rem;
+  }
+  .key-symbol {
+    font-size: 0.75rem;
   }
   .keyboard-row {
     gap: 6px;
