@@ -6,4 +6,8 @@ Por ahora, la aplicación permite que cada usuario genere su propio abecedario d
 
 ## Quiénes somos
 
-Este proyecto ha sido desarrollado por Adrián Arribas y Javier Razquin.
+Este proyecto nace de la colaboración entre:
+- **Adrián Arribas** (Ingeniero Informático) - Responsable de la arquitectura y el desarrollo técnico de la plataforma.
+- **Javier Razquin** (Profesor de Educación Primaria) - Responsable del enfoque didáctico, pedagógico y de la adaptación al aula.
+
+Uniendo tecnología y educación para crear una herramienta intuitiva y útil para el aprendizaje de la fonética.
