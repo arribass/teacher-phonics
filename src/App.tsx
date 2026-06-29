@@ -5,22 +5,23 @@ interface PhonicDetail {
   word: string;
   image: string;
   colorClass: string;
+  ipa: string;
 }
 
 const VOCALES = ['A', 'E', 'I', 'O', 'U'];
 const CONSONANTES = ['M', 'P', 'S', 'L', 'T'];
 
 const PHONIC_MAP: Record<string, PhonicDetail> = {
-  A: { letter: 'A', word: 'avión', image: '✈️', colorClass: 'gradient-sky' },
-  E: { letter: 'E', word: 'estrella', image: '⭐', colorClass: 'gradient-yellow' },
-  I: { letter: 'I', word: 'isla', image: '🏝️', colorClass: 'gradient-teal' },
-  O: { letter: 'O', word: 'ojo', image: '👁️', colorClass: 'gradient-slate' },
-  U: { letter: 'U', word: 'uvas', image: '🍇', colorClass: 'gradient-purple' },
-  M: { letter: 'M', word: 'mano', image: '✋', colorClass: 'gradient-peach' },
-  P: { letter: 'P', word: 'pato', image: '🦆', colorClass: 'gradient-amber' },
-  S: { letter: 'S', word: 'sol', image: '☀️', colorClass: 'gradient-orange' },
-  L: { letter: 'L', word: 'luna', image: '🌙', colorClass: 'gradient-blue' },
-  T: { letter: 'T', word: 'taza', image: '☕', colorClass: 'gradient-brown' }
+  A: { letter: 'A', word: 'avión', image: '✈️', colorClass: 'gradient-sky', ipa: '/a/' },
+  E: { letter: 'E', word: 'estrella', image: '⭐', colorClass: 'gradient-yellow', ipa: '/e/' },
+  I: { letter: 'I', word: 'isla', image: '🏝️', colorClass: 'gradient-teal', ipa: '/i/' },
+  O: { letter: 'O', word: 'ojo', image: '👁️', colorClass: 'gradient-slate', ipa: '/o/' },
+  U: { letter: 'U', word: 'uvas', image: '🍇', colorClass: 'gradient-purple', ipa: '/u/' },
+  M: { letter: 'M', word: 'mano', image: '✋', colorClass: 'gradient-peach', ipa: '/m/' },
+  P: { letter: 'P', word: 'pato', image: '🦆', colorClass: 'gradient-amber', ipa: '/p/' },
+  S: { letter: 'S', word: 'sol', image: '☀️', colorClass: 'gradient-orange', ipa: '/s/' },
+  L: { letter: 'L', word: 'luna', image: '🌙', colorClass: 'gradient-blue', ipa: '/l/' },
+  T: { letter: 'T', word: 'taza', image: '☕', colorClass: 'gradient-brown', ipa: '/t/' }
 };
 
 const PHONETIC_SOUNDS: Record<string, string> = {
@@ -220,179 +221,236 @@ function App() {
       {/* Writing Sandbox Section */}
       <section id="sandbox" className="sandbox-section">
         <div className="container">
-          <div className="sandbox-card card-glass">
+          <div className="sandbox-workspace">
             
-            {/* Display / Slate */}
-            <div className="slate-container">
-              <div className="slate-header">
-                <span className="slate-title">Mi Pizarra de Escritura</span>
-                <span className="slate-subtitle">Presiona las letras para oír su sonido</span>
-              </div>
-
-              <div className="slate-content">
-                {currentWord.length === 0 ? (
-                  <div className="slate-placeholder">
-                    <span>Escribe algo usando el teclado de abajo o tu teclado físico...</span>
-                  </div>
-                ) : (
-                  <div className="slate-slate-wrap">
-                    {/* Letter cards */}
-                    <div className="slate-letters">
-                      {currentWord.split('').map((letter, idx) => {
-                        const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
-                        return (
-                          <button
-                            key={idx}
-                            className={`letter-card ${isLetterActive ? 'active-spelling' : ''}`}
-                            onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
-                            disabled={isPlaying}
-                            title={`Escuchar sonido de ${letter}`}
-                          >
-                            <span className="letter-char">{letter}</span>
-                            <span className="letter-audio-icon">🔊</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Phonic Images Row */}
-                    <div className="slate-images-row">
-                      {currentWord.split('').map((letter, idx) => {
-                        const phonic = PHONIC_MAP[letter.toUpperCase()];
-                        if (!phonic) return null;
-                        const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
-                        return (
-                          <button
-                            key={idx}
-                            className={`phonic-image-card ${phonic.colorClass} ${isLetterActive ? 'active-spelling' : ''}`}
-                            onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
-                            disabled={isPlaying}
-                            title={`${letter.toUpperCase()} de ${phonic.word}`}
-                          >
-                            <span className="phonic-symbol">{phonic.image}</span>
-                            <span className="phonic-word-label">{phonic.word}</span>
-                            <span className="phonic-association">{letter.toLowerCase()}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Error messages overlay */}
-              {errorMsg && (
-                <div className="slate-error-msg">
-                  ⚠️ {errorMsg}
-                </div>
-              )}
-
-              {/* Action Buttons for spelling/controls */}
-              <div className="slate-actions">
-                <button 
-                  className="btn btn-primary btn-action" 
-                  onClick={handlePlayFullWord}
-                  disabled={isPlaying || currentWord.length === 0}
-                >
-                  🔊 Escuchar Palabra
-                </button>
+            {/* Left Column: Slate Workshop */}
+            <div className="workspace-editor">
+              <div className="sandbox-card card-glass">
                 
-                <button 
-                  className="btn btn-secondary btn-action btn-spell" 
-                  onClick={handleSpellWord}
-                  disabled={isPlaying || currentWord.length === 0}
-                  title="Escucha los sonidos letra a letra y luego la palabra completa (Blending)"
-                >
-                  🧩 Deletrear por Sonidos
-                </button>
+                {/* Display / Slate */}
+                <div className="slate-container">
+                  <div className="slate-header">
+                    <span className="slate-title">Mi Pizarra de Escritura</span>
+                    <span className="slate-subtitle">Presiona las letras para oír su sonido</span>
+                  </div>
 
-                <div className="slate-edit-controls">
-                  <button 
-                    className="btn btn-danger-outline" 
-                    onClick={handleDelete}
-                    disabled={isPlaying || currentWord.length === 0}
-                    title="Borrar última letra"
-                  >
-                    ⌫ Borrar Letra
-                  </button>
-                  <button 
-                    className="btn btn-danger-outline" 
-                    onClick={handleClear}
-                    disabled={isPlaying || currentWord.length === 0}
-                    title="Limpiar pizarra"
-                  >
-                    🧹 Limpiar Pizarra
-                  </button>
+                  <div className="slate-content">
+                    {currentWord.length === 0 ? (
+                      <div className="slate-placeholder">
+                        <span>Escribe algo usando el teclado de abajo o tu teclado físico...</span>
+                      </div>
+                    ) : (
+                      <div className="slate-slate-wrap">
+                        {/* Letter cards */}
+                        <div className="slate-letters">
+                          {currentWord.split('').map((letter, idx) => {
+                            const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
+                            return (
+                              <button
+                                key={idx}
+                                className={`letter-card ${isLetterActive ? 'active-spelling' : ''}`}
+                                onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
+                                disabled={isPlaying}
+                                title={`Escuchar sonido de ${letter}`}
+                              >
+                                <span className="letter-char">{letter}</span>
+                                <span className="letter-audio-icon">🔊</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Phonic Images Row */}
+                        <div className="slate-images-row">
+                          {currentWord.split('').map((letter, idx) => {
+                            const phonic = PHONIC_MAP[letter.toUpperCase()];
+                            if (!phonic) return null;
+                            const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
+                            return (
+                              <button
+                                key={idx}
+                                className={`phonic-image-card ${phonic.colorClass} ${isLetterActive ? 'active-spelling' : ''}`}
+                                onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
+                                disabled={isPlaying}
+                                title={`${letter.toUpperCase()} de ${phonic.word}`}
+                              >
+                                <span className="phonic-symbol">{phonic.image}</span>
+                                <span className="phonic-word-label">{phonic.word}</span>
+                                <span className="phonic-association">{letter.toLowerCase()}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Error messages overlay */}
+                  {errorMsg && (
+                    <div className="slate-error-msg">
+                      ⚠️ {errorMsg}
+                    </div>
+                  )}
+
+                  {/* Action Buttons for spelling/controls */}
+                  <div className="slate-actions">
+                    <button 
+                      className="btn btn-primary btn-action" 
+                      onClick={handlePlayFullWord}
+                      disabled={isPlaying || currentWord.length === 0}
+                    >
+                      🔊 Escuchar Palabra
+                    </button>
+                    
+                    <button 
+                      className="btn btn-secondary btn-action btn-spell" 
+                      onClick={handleSpellWord}
+                      disabled={isPlaying || currentWord.length === 0}
+                      title="Escucha los sonidos letra a letra y luego la palabra completa (Blending)"
+                    >
+                      🧩 Deletrear por Sonidos
+                    </button>
+
+                    <div className="slate-edit-controls">
+                      <button 
+                        className="btn btn-danger-outline" 
+                        onClick={handleDelete}
+                        disabled={isPlaying || currentWord.length === 0}
+                        title="Borrar última letra"
+                      >
+                        ⌫ Borrar Letra
+                      </button>
+                      <button 
+                        className="btn btn-danger-outline" 
+                        onClick={handleClear}
+                        disabled={isPlaying || currentWord.length === 0}
+                        title="Limpiar pizarra"
+                      >
+                        🧹 Limpiar Pizarra
+                      </button>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Virtual Keyboard */}
+                <div className="keyboard-container">
+                  <h3 className="keyboard-title">Tus Letras Mágicas</h3>
+                  
+                  {/* Vowels */}
+                  <div className="keyboard-row-wrapper">
+                    <span className="row-label vocal-label">Vocales:</span>
+                    <div className="keyboard-row">
+                      {VOCALES.map((letter) => {
+                        const phonic = PHONIC_MAP[letter];
+                        return (
+                          <button
+                            key={letter}
+                            className="key-btn key-vowel"
+                            onClick={() => handleKeyPress(letter)}
+                            disabled={isPlaying}
+                          >
+                            <span className="key-letter">{letter}</span>
+                            <span className="key-symbol">{phonic?.image}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Consonants */}
+                  <div className="keyboard-row-wrapper" style={{ marginTop: '16px' }}>
+                    <span className="row-label consonant-label">Consonantes:</span>
+                    <div className="keyboard-row">
+                      {CONSONANTES.map((letter) => {
+                        const phonic = PHONIC_MAP[letter];
+                        return (
+                          <button
+                            key={letter}
+                            className="key-btn key-consonant"
+                            onClick={() => handleKeyPress(letter)}
+                            disabled={isPlaying}
+                          >
+                            <span className="key-letter">{letter}</span>
+                            <span className="key-symbol">{phonic?.image}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Instructions */}
+                  <p className="keyboard-instructions">
+                    💡 <em>También puedes escribir usando las teclas correspondientes de tu teclado físico.</em>
+                  </p>
+                </div>
+
+                {/* Suggested Words */}
+                <div className="suggestions-container">
+                  <h4 className="suggestions-title">Palabras sugeridas para practicar:</h4>
+                  <div className="suggestions-list">
+                    {SUGGESTED_WORDS.map((word) => (
+                      <button
+                        key={word}
+                        className="suggestion-badge"
+                        onClick={() => handleLoadWord(word)}
+                        disabled={isPlaying}
+                      >
+                        {word.toLowerCase()} <span>➔</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
               </div>
             </div>
 
-            {/* Virtual Keyboard */}
-            <div className="keyboard-container">
-              <h3 className="keyboard-title">Tus Letras Mágicas</h3>
-              
-              {/* Vowels */}
-              <div className="keyboard-row-wrapper">
-                <span className="row-label vocal-label">Vocales:</span>
-                <div className="keyboard-row">
-                  {VOCALES.map((letter) => {
-                    const phonic = PHONIC_MAP[letter];
-                    return (
-                      <button
-                        key={letter}
-                        className="key-btn key-vowel"
-                        onClick={() => handleKeyPress(letter)}
-                        disabled={isPlaying}
-                      >
-                        <span className="key-letter">{letter}</span>
-                        <span className="key-symbol">{phonic?.image}</span>
-                      </button>
-                    );
-                  })}
+            {/* Right Column: Classroom Phonics Sheet */}
+            <div className="workspace-sheet">
+              <div className="phonics-sheet card-glass">
+                <div className="sheet-header">
+                  <span className="sheet-pin">📌</span>
+                  <div className="sheet-title-group">
+                    <h3 className="sheet-title">Ficha de Phonics</h3>
+                    <span className="sheet-subtitle">Sonidos Activos de la Demo</span>
+                  </div>
+                  <span className="sheet-level-badge">Fase 1 (es)</span>
                 </div>
-              </div>
-
-              {/* Consonants */}
-              <div className="keyboard-row-wrapper" style={{ marginTop: '16px' }}>
-                <span className="row-label consonant-label">Consonantes:</span>
-                <div className="keyboard-row">
-                  {CONSONANTES.map((letter) => {
-                    const phonic = PHONIC_MAP[letter];
-                    return (
-                      <button
-                        key={letter}
-                        className="key-btn key-consonant"
-                        onClick={() => handleKeyPress(letter)}
-                        disabled={isPlaying}
-                      >
-                        <span className="key-letter">{letter}</span>
-                        <span className="key-symbol">{phonic?.image}</span>
-                      </button>
-                    );
-                  })}
+                
+                <div className="sheet-body">
+                  <p className="sheet-intro">
+                    Esta es tu hoja de referencia actual. Haz clic en cualquier fonema para escuchar su sonido individual.
+                  </p>
+                  
+                  <div className="sheet-grid">
+                    {Object.values(PHONIC_MAP).map((phonic) => {
+                      const isVoc = VOCALES.includes(phonic.letter);
+                      return (
+                        <button
+                          key={phonic.letter}
+                          className={`sheet-card ${phonic.colorClass}`}
+                          onClick={() => !isPlaying && speakLetter(phonic.letter)}
+                          disabled={isPlaying}
+                          title={`Reproducir fonema /${phonic.letter.toLowerCase()}/`}
+                        >
+                          <div className="sheet-card-top">
+                            <span className={`sheet-letter ${isVoc ? 'txt-vocal' : 'txt-consonant'}`}>
+                              {phonic.letter}
+                            </span>
+                            <span className="sheet-ipa">{phonic.ipa}</span>
+                          </div>
+                          <span className="sheet-image">{phonic.image}</span>
+                          <span className="sheet-word">{phonic.word}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="sheet-footer">
+                    <p className="sheet-note">
+                      ✍️ <em>Escribe palabras combinando estos sonidos (ej: sopa, mapa, lupa, pato).</em>
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              {/* Instructions */}
-              <p className="keyboard-instructions">
-                💡 <em>También puedes escribir usando las teclas correspondientes de tu teclado físico.</em>
-              </p>
-            </div>
-
-            {/* Suggested Words */}
-            <div className="suggestions-container">
-              <h4 className="suggestions-title">Palabras sugeridas para practicar:</h4>
-              <div className="suggestions-list">
-                {SUGGESTED_WORDS.map((word) => (
-                  <button
-                    key={word}
-                    className="suggestion-badge"
-                    onClick={() => handleLoadWord(word)}
-                    disabled={isPlaying}
-                  >
-                    {word.toLowerCase()} <span>➔</span>
-                  </button>
-                ))}
               </div>
             </div>
 

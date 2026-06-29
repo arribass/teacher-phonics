@@ -201,7 +201,7 @@ p {
 /* Layout Utilities */
 .container {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -330,7 +330,7 @@ p {
 
 /* Hero Section */
 .hero {
-  padding: 70px 0 50px 0;
+  padding: 60px 0 30px 0;
   text-align: center;
 }
 
@@ -353,20 +353,33 @@ p {
 .hero-subtitle {
   font-size: 1.15rem;
   color: var(--text-muted);
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   line-height: 1.6;
 }
 
-/* Interactive Sandbox Section */
+/* Interactive Sandbox Section with Double-Column Workspace */
 .sandbox-section {
-  padding: 40px 0 80px 0;
+  padding: 20px 0 80px 0;
 }
 
-.sandbox-card {
-  padding: 32px;
+.sandbox-workspace {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.workspace-editor {
   display: flex;
   flex-direction: column;
   gap: 32px;
+}
+
+.sandbox-card {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-lg);
 }
@@ -866,6 +879,166 @@ p {
   cursor: not-allowed;
 }
 
+/* --- Phonics Sheet (Right Column) --- */
+.workspace-sheet {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 80px; /* Aligns with navbar sticky */
+}
+
+/* Lined Manuscript Paper Worksheet Style */
+.phonics-sheet {
+  background-color: #fffdeb; /* Soft Creamy Didactic Paper background */
+  border-left: 6px solid var(--accent); /* Binder tab line */
+  border-radius: var(--radius-md);
+  border-right: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  padding: 24px;
+  /* Lined paper visual effect */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 100% 26px;
+  line-height: 26px;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid rgba(249, 115, 22, 0.15);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.sheet-pin {
+  font-size: 1.4rem;
+  transform: rotate(-10deg);
+}
+
+.sheet-title-group {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.sheet-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.sheet-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.sheet-level-badge {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sheet-intro {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Phonics sheet item cards */
+.sheet-card {
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  transition: all var(--transition-bounce);
+}
+
+.sheet-card:hover {
+  transform: scale(1.05) translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.sheet-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.sheet-letter {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.txt-vocal {
+  color: #f97316;
+}
+
+.txt-consonant {
+  color: var(--primary);
+}
+
+.sheet-ipa {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-light);
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.sheet-image {
+  font-size: 1.6rem;
+  line-height: 1;
+  margin: 2px 0;
+}
+
+.sheet-word {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.sheet-footer {
+  margin-top: 24px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+  padding-top: 16px;
+  text-align: center;
+}
+
+.sheet-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 /* Footer Styles */
 .footer {
   padding: 60px 0 40px 0;
@@ -937,6 +1110,16 @@ p {
 }
 
 /* Responsive Customization */
+@media (max-width: 900px) {
+  .sandbox-workspace {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .workspace-sheet {
+    position: static;
+  }
+}
+
 @media (max-width: 768px) {
   .sandbox-card {
     padding: 20px;
