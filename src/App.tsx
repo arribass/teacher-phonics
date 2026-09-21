@@ -7,8 +7,11 @@ import {
   ENGLISH_VOWELS,
   ENGLISH_CONSONANTS,
   ENGLISH_PHONIC_MAP,
+  ENGLISH_DIGRAPHS_MAP,
+  ALL_PHONICS_MAP,
   SUGGESTED_ENGLISH_WORDS,
-  findWordIllustration
+  findWordIllustration,
+  tokenizePhonics
 } from './data/englishPhonics';
 
 function PhonicsMainApp() {
@@ -22,7 +25,7 @@ function PhonicsMainApp() {
     saveWordToProfile
   } = useAuth();
 
-  const [currentWord, setCurrentWord] = useState<string>('MAP');
+  const [currentWord, setCurrentWord] = useState<string>('PHONE');
   const [activeSpellingIndex, setActiveSpellingIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -54,9 +57,11 @@ function PhonicsMainApp() {
     });
   };
 
-  const speakLetter = async (letter: string) => {
-    const phonic = ENGLISH_PHONIC_MAP[letter];
-    const soundText = phonic ? phonic.soundHint : letter;
+  const [recentlyMergedIndex, setRecentlyMergedIndex] = useState<number | null>(null);
+
+  const speakToken = async (token: string) => {
+    const phonic = ALL_PHONICS_MAP[token.toUpperCase()];
+    const soundText = phonic ? phonic.soundHint : token;
     await speak(soundText, 0.6);
   };
 
@@ -64,15 +69,35 @@ function PhonicsMainApp() {
     await speak(word, 0.8);
   };
 
-  const handleKeyPress = async (letter: string) => {
+  const handleKeyPress = async (text: string) => {
     if (isPlaying) return;
-    if (currentWord.length >= 10) {
-      showError('¡La palabra no puede tener más de 10 letras!');
+    if (currentWord.length + text.length > 12) {
+      showError('¡La palabra no puede tener más de 12 caracteres!');
       return;
     }
-    const newWord = currentWord + letter;
+
+    const addedText = text.toUpperCase();
+    const prevTokens = tokenizePhonics(currentWord);
+    const newWord = currentWord + addedText;
+    const newTokens = tokenizePhonics(newWord);
+
+    // Detect if a new 2-letter digraph token was just formed at the end (e.g. typing H after P -> PH)
+    const lastNewToken = newTokens[newTokens.length - 1];
+    const isDigraphFusion = lastNewToken && lastNewToken.length > 1 && (!prevTokens.length || prevTokens[prevTokens.length - 1] !== lastNewToken);
+
     setCurrentWord(newWord);
-    await speakLetter(letter);
+
+    if (isDigraphFusion) {
+      const mergedIdx = newTokens.length - 1;
+      setRecentlyMergedIndex(mergedIdx);
+      showNotification(`✨ ¡Fusión de Dígrafo! P + H ➔ ${lastNewToken} (${ALL_PHONICS_MAP[lastNewToken]?.ipa || '/f/'})`);
+      await speakToken(lastNewToken);
+      setTimeout(() => {
+        setRecentlyMergedIndex(null);
+      }, 700);
+    } else {
+      await speakToken(addedText);
+    }
   };
 
   const handleDelete = () => {
@@ -100,12 +125,13 @@ function PhonicsMainApp() {
     setIsPlaying(true);
 
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const tokens = tokenizePhonics(currentWord);
 
-    // Spell letter by letter
-    for (let i = 0; i < currentWord.length; i++) {
+    // Spell token by token (supports 2-letter digraphs PH, OU, CH, SH, TH, WH, CK, etc.)
+    for (let i = 0; i < tokens.length; i++) {
       setActiveSpellingIndex(i);
-      await speakLetter(currentWord[i]);
-      await delay(500);
+      await speakToken(tokens[i]);
+      await delay(550);
     }
 
     setActiveSpellingIndex(null);
@@ -141,7 +167,7 @@ function PhonicsMainApp() {
   const handleAddToMaterial = () => {
     if (!currentWord) return;
     const illustration = findWordIllustration(currentWord);
-    const phonicsBreakdown = currentWord.split('').map((l) => l.toUpperCase());
+    const phonicsBreakdown = tokenizePhonics(currentWord);
 
     const success = addToMaterial(currentWord, illustration, phonicsBreakdown);
     if (success) {
@@ -155,17 +181,16 @@ function PhonicsMainApp() {
   const handleSaveToProfile = async () => {
     if (!currentWord) return;
     const illustration = findWordIllustration(currentWord);
-    const phonicsBreakdown = currentWord.split('').map((l) => l.toUpperCase());
+    const phonicsBreakdown = tokenizePhonics(currentWord);
     const ok = await saveWordToProfile(currentWord, phonicsBreakdown, illustration);
     if (ok) {
       showNotification(`⭐ "${currentWord}" guardada en tu colección de usuario.`);
     }
   };
 
-  // Keyboard support for physical keyboard typing
+  // Physical Keyboard Support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept typing if focus is inside an input/textarea
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
         return;
       }
@@ -177,11 +202,8 @@ function PhonicsMainApp() {
         handlePlayFullWord();
       } else if (e.key === 'Escape') {
         handleClear();
-      } else {
-        const char = e.key.toUpperCase();
-        if (ENGLISH_VOWELS.includes(char) || ENGLISH_CONSONANTS.includes(char)) {
-          handleKeyPress(char);
-        }
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        handleKeyPress(e.key.toUpperCase());
       }
     };
 
@@ -190,6 +212,8 @@ function PhonicsMainApp() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [currentWord, isPlaying]);
+
+  const currentTokens = tokenizePhonics(currentWord);
 
   return (
     <>
@@ -201,7 +225,7 @@ function PhonicsMainApp() {
         <div className="container navbar-content">
           <a href="#" className="logo-wrapper">
             <div className="logo-icon">🍎</div>
-            <span className="logo-text">Teacher<span>Phonics</span> <small className="lang-badge">English Phonics</small></span>
+            <span className="logo-text">Teacher<span>Phonics</span> <small className="lang-badge">English Phonics & Digraphs</small></span>
           </a>
 
           <div className="navbar-actions">
@@ -257,16 +281,16 @@ function PhonicsMainApp() {
       {/* Hero Section */}
       <header className="hero container">
         <div className="hero-content">
-          <div className="badge">🇬🇧 Pizarra de Phonics en Inglés • Generador de Materiales 2x4</div>
+          <div className="badge">🇬🇧 English Phonics • Reconocimiento de Dígrafos (PH, OU, CH, SH, TH, WH, CK)</div>
           <h1 className="hero-title">
-            Aprende a leer en inglés creando <span>fichas de phonics</span>
+            Aprende a leer en inglés con <span>dígrafos y fonemas de 2 letras</span>
           </h1>
           <p className="hero-subtitle">
-            Combina los sonidos del abecedario en inglés (A-Z), escucha la pronunciación fonética nativa y 
-            crea tus propias fichas de trabajo en formato 2x4 (8 palabras ilustradas) listas para imprimir o guardar.
+            Combina vocales, consonantes y dígrafos complejos como <strong>PH</strong> (/f/ en <em>phone</em>), <strong>OU</strong> (en <em>touch</em>), 
+            <strong>CH</strong>, <strong>SH</strong>, <strong>TH</strong> y crea fichas didácticas 2x4 (8 palabras ilustradas) listas para imprimir.
           </p>
           <div className="hero-actions">
-            <a href="#sandbox" className="btn btn-primary">¡Comenzar a escribir en inglés! ✍️</a>
+            <a href="#sandbox" className="btn btn-primary">¡Probar palabras con PH, OU, CH! ✍️</a>
             <button className="btn btn-secondary" onClick={() => setIsMaterialModalOpen(true)}>
               👁️ Previsualizar Ficha 2x4 ({currentMaterialItems.length}/8)
             </button>
@@ -287,8 +311,8 @@ function PhonicsMainApp() {
                 <div className="slate-container">
                   <div className="slate-header">
                     <div className="slate-header-left">
-                      <span className="slate-title">Mi Pizarra de Escritura (English Phonics)</span>
-                      <span className="slate-subtitle">Haz clic en las letras o usa tu teclado para escuchar los sonidos en inglés</span>
+                      <span className="slate-title">Mi Pizarra de Escritura (Dígrafos y Fonemas)</span>
+                      <span className="slate-subtitle">Detector automático de dígrafos (ej: PHONE ➔ PH-O-N-E | TOUCH ➔ T-OU-CH)</span>
                     </div>
                     <button
                       className={`btn-toggle-sheet ${showPhonicsSheet ? 'active' : ''}`}
@@ -302,7 +326,7 @@ function PhonicsMainApp() {
                   <div className="slate-content">
                     {currentWord.length === 0 ? (
                       <div className="slate-placeholder">
-                        <span>Escribe una palabra en inglés usando el teclado de abajo (ej: MAP, CAT, DOG, SUN)...</span>
+                        <span>Escribe una palabra en inglés (ej: PHONE, TOUCH, CHIP, SHIP, DUCK, GRAPH)...</span>
                       </div>
                     ) : (
                       <div className="slate-slate-wrap">
@@ -312,19 +336,23 @@ function PhonicsMainApp() {
                           <span className="word-label">{currentWord}</span>
                         </div>
 
-                        {/* Letter cards */}
+                        {/* Phoneme token cards */}
                         <div className="slate-letters">
-                          {currentWord.split('').map((letter, idx) => {
-                            const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
+                          {currentTokens.map((token, idx) => {
+                            const isTokenActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
+                            const isDigraph = token.length > 1;
+                            const isJustMerged = recentlyMergedIndex === idx;
+
                             return (
                               <button
                                 key={idx}
-                                className={`letter-card ${isLetterActive ? 'active-spelling' : ''}`}
-                                onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
+                                className={`letter-card ${isTokenActive ? 'active-spelling' : ''} ${isDigraph ? 'digraph-card' : ''} ${isJustMerged ? 'digraph-merging' : ''}`}
+                                onClick={() => !isPlaying && speakToken(token)}
                                 disabled={isPlaying}
-                                title={`Escuchar sonido fonético de /${letter.toLowerCase()}/`}
+                                title={`Fonema: ${token} ${isDigraph ? '(Dígrafo de 2 letras)' : ''}`}
                               >
-                                <span className="letter-char">{letter}</span>
+                                {isJustMerged && <span className="digraph-merge-sparkle">✨</span>}
+                                <span className="letter-char">{token}</span>
                                 <span className="letter-audio-icon">🔊</span>
                               </button>
                             );
@@ -333,18 +361,21 @@ function PhonicsMainApp() {
 
                         {/* Phonic Images Row */}
                         <div className="slate-images-row">
-                          {currentWord.split('').map((letter, idx) => {
-                            const phonic = ENGLISH_PHONIC_MAP[letter.toUpperCase()];
+                          {currentTokens.map((token, idx) => {
+                            const phonic = ALL_PHONICS_MAP[token];
                             if (!phonic) return null;
-                            const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
+                            const isTokenActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
+                            const isJustMerged = recentlyMergedIndex === idx;
+
                             return (
                               <button
                                 key={idx}
-                                className={`phonic-image-card ${phonic.colorClass} ${isLetterActive ? 'active-spelling' : ''}`}
-                                onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
+                                className={`phonic-image-card ${phonic.colorClass} ${isTokenActive ? 'active-spelling' : ''} ${isJustMerged ? 'digraph-merging' : ''}`}
+                                onClick={() => !isPlaying && speakToken(token)}
                                 disabled={isPlaying}
-                                title={`${letter.toUpperCase()} for ${phonic.word}`}
+                                title={`${token} for ${phonic.word} (${phonic.ipa})`}
                               >
+                                {isJustMerged && <span className="digraph-merge-sparkle">✨</span>}
                                 <span className="phonic-symbol">{phonic.image}</span>
                                 <span className="phonic-word-label">{phonic.word}</span>
                                 <span className="phonic-association">{phonic.ipa}</span>
@@ -377,17 +408,17 @@ function PhonicsMainApp() {
                       className="btn btn-secondary btn-action btn-spell" 
                       onClick={handleSpellWord}
                       disabled={isPlaying || currentWord.length === 0}
-                      title="Deletrear por fonemas de inglés (Blending)"
+                      title="Deletrear reconociendo dígrafos (PH, OU, CH, etc.)"
                     >
-                      🧩 Deletrear por Sonidos
+                      🧩 Deletrear por Fonemas
                     </button>
 
-                    {/* NEW: Add to 2x4 Material File Button */}
+                    {/* Add to 2x4 Material File Button */}
                     <button
                       className="btn btn-material-add"
                       onClick={handleAddToMaterial}
                       disabled={isPlaying || currentWord.length === 0}
-                      title="Añadir esta palabra con su ilustración a la ficha 2x4"
+                      title="Añadir esta palabra con sus fonemas a la ficha 2x4"
                     >
                       ➕ Añadir al Material (2x4) <span className="btn-badge">{currentMaterialItems.length}/8</span>
                     </button>
@@ -422,12 +453,34 @@ function PhonicsMainApp() {
                   </div>
                 </div>
 
-                {/* Virtual Keyboard with All 26 English Letters */}
+                {/* Virtual Keyboard with Vocals, Consonants and Digraphs */}
                 <div className="keyboard-container">
-                  <h3 className="keyboard-title">Abecedario en Inglés (A - Z)</h3>
+                  <h3 className="keyboard-title">Abecedario y Dígrafos en Inglés</h3>
                   
-                  {/* Vowels */}
+                  {/* Digraphs (2-Letter Phonemes) */}
                   <div className="keyboard-row-wrapper">
+                    <span className="row-label digraph-label">Dígrafos (2 letras):</span>
+                    <div className="keyboard-row keyboard-grid-consonants">
+                      {Object.keys(ENGLISH_DIGRAPHS_MAP).map((digraph) => {
+                        const phonic = ENGLISH_DIGRAPHS_MAP[digraph];
+                        return (
+                          <button
+                            key={digraph}
+                            className="key-btn key-vowel key-digraph"
+                            onClick={() => handleKeyPress(digraph)}
+                            disabled={isPlaying}
+                            title={`Añadir dígrafo ${digraph} (${phonic.word} ${phonic.ipa})`}
+                          >
+                            <span className="key-letter">{digraph}</span>
+                            <span className="key-symbol">{phonic.image}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Vowels */}
+                  <div className="keyboard-row-wrapper" style={{ marginTop: '16px' }}>
                     <span className="row-label vocal-label">Vocales ({ENGLISH_VOWELS.length}):</span>
                     <div className="keyboard-row">
                       {ENGLISH_VOWELS.map((letter) => {
@@ -470,13 +523,13 @@ function PhonicsMainApp() {
 
                   {/* Instructions */}
                   <p className="keyboard-instructions">
-                    💡 <em>Escribe palabras en inglés con tu teclado físico o pulsando los botones de arriba.</em>
+                    💡 <em>Escribe palabras como PHONE, TOUCH, CHIP, SHIP o GRAPH con tu teclado físico o pulsando los dígrafos.</em>
                   </p>
                 </div>
 
-                {/* Suggested Words */}
+                {/* Suggested Words with Digraphs */}
                 <div className="suggestions-container">
-                  <h4 className="suggestions-title">Palabras CVC sugeridas en inglés:</h4>
+                  <h4 className="suggestions-title">Palabras con dígrafos sugeridas:</h4>
                   <div className="suggestions-list">
                     {SUGGESTED_ENGLISH_WORDS.map((word) => {
                       const img = findWordIllustration(word);
@@ -497,16 +550,16 @@ function PhonicsMainApp() {
               </div>
             </div>
 
-            {/* Right Column: Classroom Phonics Sheet A-Z */}
+            {/* Right Column: Classroom Phonics Sheet A-Z & Digraphs */}
             <div className="workspace-sheet">
               <div className="phonics-sheet card-glass">
                 <div className="sheet-header">
                   <span className="sheet-pin">📌</span>
                   <div className="sheet-title-group">
-                    <h3 className="sheet-title">English Phonics Chart</h3>
-                    <span className="sheet-subtitle">Sonidos A - Z completos</span>
+                    <h3 className="sheet-title">English Phonics & Digraphs</h3>
+                    <span className="sheet-subtitle">Fonemas de 1 y 2 letras</span>
                   </div>
-                  <span className="sheet-level-badge">English CVC</span>
+                  <span className="sheet-level-badge">PH / OU / CH</span>
                   <button 
                     className="sheet-close-btn"
                     onClick={() => setShowPhonicsSheet(false)}
@@ -518,17 +571,18 @@ function PhonicsMainApp() {
                 
                 <div className="sheet-body">
                   <p className="sheet-intro">
-                    Haz clic en cualquier fonema para escuchar su pronunciación nativa en inglés.
+                    Haz clic en cualquier fonema o dígrafo para escuchar su pronunciación nativa.
                   </p>
                   
                   <div className="sheet-grid">
-                    {Object.values(ENGLISH_PHONIC_MAP).map((phonic) => {
+                    {Object.values(ALL_PHONICS_MAP).map((phonic) => {
                       const isVoc = ENGLISH_VOWELS.includes(phonic.letter);
+                      const isDigraph = phonic.letter.length > 1;
                       return (
                         <button
                           key={phonic.letter}
-                          className={`sheet-card ${phonic.colorClass}`}
-                          onClick={() => !isPlaying && speakLetter(phonic.letter)}
+                          className={`sheet-card ${phonic.colorClass} ${isDigraph ? 'sheet-card-digraph' : ''}`}
+                          onClick={() => !isPlaying && speakToken(phonic.letter)}
                           disabled={isPlaying}
                           title={`Listen sound for ${phonic.letter} (${phonic.word})`}
                         >
@@ -547,7 +601,7 @@ function PhonicsMainApp() {
                   
                   <div className="sheet-footer">
                     <p className="sheet-note">
-                      ✍️ <em>Escribe palabras como MAP, CAT, DOG, SUN, BUS, FOX, PIG para crear tu ficha 2x4.</em>
+                      ✍️ <em>Escribe palabras como PHONE, TOUCH, CHIP, SHIP, DUCK para tu ficha 2x4.</em>
                     </p>
                   </div>
                 </div>

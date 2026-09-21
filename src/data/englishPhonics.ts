@@ -42,6 +42,29 @@ export const ENGLISH_PHONIC_MAP: Record<string, PhonicDetail> = {
   Z: { letter: 'Z', word: 'zebra', image: '🦓', colorClass: 'gradient-slate', ipa: '/z/', soundHint: 'zzz' }
 };
 
+// Digraphs & 2-Letter Multi-Letter Phonemes (PH, OU, CH, SH, TH, WH, CK, EE, OO, AI, OA, AR, OR, QU)
+export const ENGLISH_DIGRAPHS_MAP: Record<string, PhonicDetail> = {
+  PH: { letter: 'PH', word: 'phone', image: '📞', colorClass: 'gradient-teal', ipa: '/f/', soundHint: 'fff (f-sound)' },
+  OU: { letter: 'OU', word: 'touch', image: '👆', colorClass: 'gradient-purple', ipa: '/aʊ/ /ʌ/', soundHint: 'ow / uh' },
+  CH: { letter: 'CH', word: 'chair', image: '🪑', colorClass: 'gradient-orange', ipa: '/tʃ/', soundHint: 'ch' },
+  SH: { letter: 'SH', word: 'ship', image: '🚢', colorClass: 'gradient-sky', ipa: '/ʃ/', soundHint: 'shh' },
+  TH: { letter: 'TH', word: 'tree', image: '🌳', colorClass: 'gradient-amber', ipa: '/θ/', soundHint: 'th' },
+  WH: { letter: 'WH', word: 'whale', image: '🐳', colorClass: 'gradient-blue', ipa: '/w/', soundHint: 'wuh' },
+  CK: { letter: 'CK', word: 'duck', image: '🦆', colorClass: 'gradient-peach', ipa: '/k/', soundHint: 'kuh' },
+  EE: { letter: 'EE', word: 'tree', image: '🌳', colorClass: 'gradient-yellow', ipa: '/iː/', soundHint: 'eee' },
+  OO: { letter: 'OO', word: 'moon', image: '🌙', colorClass: 'gradient-purple', ipa: '/uː/', soundHint: 'ooo' },
+  AI: { letter: 'AI', word: 'rain', image: '🌧️', colorClass: 'gradient-sky', ipa: '/eɪ/', soundHint: 'ay' },
+  OA: { letter: 'OA', word: 'boat', image: '⛵', colorClass: 'gradient-amber', ipa: '/oʊ/', soundHint: 'oh' },
+  AR: { letter: 'AR', word: 'star', image: '⭐', colorClass: 'gradient-yellow', ipa: '/ɑːr/', soundHint: 'ahr' },
+  OR: { letter: 'OR', word: 'fork', image: '🍴', colorClass: 'gradient-orange', ipa: '/ɔːr/', soundHint: 'or' },
+  QU: { letter: 'QU', word: 'queen', image: '👑', colorClass: 'gradient-rose', ipa: '/kw/', soundHint: 'kw' }
+};
+
+export const ALL_PHONICS_MAP: Record<string, PhonicDetail> = {
+  ...ENGLISH_PHONIC_MAP,
+  ...ENGLISH_DIGRAPHS_MAP
+};
+
 export const ENGLISH_WORD_DICTIONARY: Record<string, { image: string; translation: string }> = {
   MAP: { image: '🗺️', translation: 'Mapa' },
   ANT: { image: '🐜', translation: 'Hormiga' },
@@ -61,7 +84,7 @@ export const ENGLISH_WORD_DICTIONARY: Record<string, { image: string; translatio
   HAT: { image: '🎩', translation: 'Sombrero' },
   NET: { image: '🕸️', translation: 'Red' },
   KEY: { image: '🔑', translation: 'Llave' },
-  BAT: { image: '🦇', translation: 'Murciélago / Bate' },
+  BAT: { image: '🦇', translation: 'Murciélago' },
   RAT: { image: '🐀', translation: 'Rata' },
   HEN: { image: '🐔', translation: 'Gallina' },
   LOG: { image: '🪵', translation: 'Tronco' },
@@ -91,12 +114,27 @@ export const ENGLISH_WORD_DICTIONARY: Record<string, { image: string; translatio
   DUCK: { image: '🦆', translation: 'Pato' },
   BIRD: { image: '🐦', translation: 'Pájaro' },
   LION: { image: '🦁', translation: 'León' },
-  TREE: { image: '🌳', translation: 'Árbol' }
+  TREE: { image: '🌳', translation: 'Árbol' },
+
+  // Words with Digraphs / 2-letter phonemes (PH, OU, CH, SH, TH, WH, CK)
+  PHONE: { image: '📞', translation: 'Teléfono' },
+  TOUCH: { image: '👆', translation: 'Tocar' },
+  PHOTO: { image: '📷', translation: 'Fotografía' },
+  GRAPH: { image: '📊', translation: 'Gráfico' },
+  DOLPHIN: { image: '🐬', translation: 'Delfín' },
+  CHIP: { image: '🍟', translation: 'Patata frita' },
+  CHAIR: { image: '🪑', translation: 'Silla' },
+  SHIP: { image: '🚢', translation: 'Barco' },
+  SHARK: { image: '🦈', translation: 'Tiburón' },
+  HOUSE: { image: '🏠', translation: 'Casa' },
+  MOUSE: { image: '🐭', translation: 'Ratón' },
+  CLOUD: { image: '☁️', translation: 'Nube' },
+  SOUP: { image: '🥣', translation: 'Sopa' }
 };
 
 export const SUGGESTED_ENGLISH_WORDS = [
-  'MAP', 'ANT', 'CAT', 'DOG', 'SUN', 'BUS', 'FOX', 'PIG', 
-  'PEN', 'BED', 'BUG', 'JAM', 'CUP', 'BOX', 'VAN', 'HAT'
+  'PHONE', 'TOUCH', 'MAP', 'CAT', 'DOG', 'SUN', 'SHIP', 
+  'CHIP', 'DUCK', 'MOON', 'FISH', 'BUS', 'FOX', 'PIG', 'BED'
 ];
 
 export function findWordIllustration(word: string): string {
@@ -104,9 +142,44 @@ export function findWordIllustration(word: string): string {
   if (ENGLISH_WORD_DICTIONARY[upper]) {
     return ENGLISH_WORD_DICTIONARY[upper].image;
   }
+  // Check for digraph start
+  if (upper.length >= 2) {
+    const start2 = upper.substring(0, 2);
+    if (ENGLISH_DIGRAPHS_MAP[start2]) {
+      return ENGLISH_DIGRAPHS_MAP[start2].image;
+    }
+  }
   // Fallback: check first letter's emoji
   if (upper.length > 0 && ENGLISH_PHONIC_MAP[upper[0]]) {
     return ENGLISH_PHONIC_MAP[upper[0]].image;
   }
   return '📝';
+}
+
+/**
+ * Phonics Tokenizer Engine:
+ * Converts an English word into an array of phoneme tokens, automatically detecting 2-letter digraphs (PH, OU, CH, SH, TH, WH, CK, EE, OO, AI, OA, AR, OR, QU).
+ * Example: 'PHONE' -> ['PH', 'O', 'N', 'E']
+ * Example: 'TOUCH' -> ['T', 'OU', 'CH']
+ * Example: 'GRAPH' -> ['G', 'R', 'A', 'PH']
+ */
+export function tokenizePhonics(word: string): string[] {
+  const upper = word.trim().toUpperCase();
+  const result: string[] = [];
+  let i = 0;
+
+  while (i < upper.length) {
+    if (i + 1 < upper.length) {
+      const pair = upper.substring(i, i + 2);
+      if (ENGLISH_DIGRAPHS_MAP[pair]) {
+        result.push(pair);
+        i += 2;
+        continue;
+      }
+    }
+    result.push(upper[i]);
+    i += 1;
+  }
+
+  return result;
 }

@@ -1,6 +1,12 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ENGLISH_PHONIC_MAP, ENGLISH_VOWELS, ENGLISH_CONSONANTS } from '../data/englishPhonics';
+import {
+  ENGLISH_PHONIC_MAP,
+  ENGLISH_DIGRAPHS_MAP,
+  ALL_PHONICS_MAP,
+  ENGLISH_VOWELS,
+  ENGLISH_CONSONANTS
+} from '../data/englishPhonics';
 
 interface UserProfileProps {
   onLoadWordToSlate: (word: string) => void;
@@ -19,8 +25,8 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onLoadWordToSlate }) =
 
   if (!isProfileOpen || !user) return null;
 
-  const speakPhonic = (letter: string) => {
-    const detail = ENGLISH_PHONIC_MAP[letter];
+  const speakPhonic = (letterOrDigraph: string) => {
+    const detail = ALL_PHONICS_MAP[letterOrDigraph];
     if (!detail) return;
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -106,15 +112,36 @@ export const UserProfile: React.FC<UserProfileProps> = ({ onLoadWordToSlate }) =
           </div>
         </div>
 
-        {/* Section 1: English Phonics Alphabet Explorer (A-Z) */}
+        {/* Section 1: English Phonics & Digraphs Explorer */}
         <section className="profile-section">
           <div className="section-title-group">
-            <h3>🔤 Abecedario Completo de Phonics en Inglés (A-Z)</h3>
-            <p>Haz clic en cualquier letra para escuchar su pronunciación fonética y palabra clave en inglés.</p>
+            <h3>🔤 Fonemas y Dígrafos en Inglés (PH, OU, CH, SH, TH, WH, CK...)</h3>
+            <p>Haz clic en cualquier letra o dígrafo de 2 letras para escuchar su pronunciación fonética.</p>
           </div>
 
           <div className="alphabet-grid-container">
-            <h4>Vocales en Inglés ({ENGLISH_VOWELS.length}):</h4>
+            {/* Digraphs Section */}
+            <h4 style={{ color: '#d97706' }}>✨ Dígrafos Fonéticos (Fonemas de 2 Letras):</h4>
+            <div className="alphabet-grid">
+              {Object.keys(ENGLISH_DIGRAPHS_MAP).map((digraph) => {
+                const detail = ENGLISH_DIGRAPHS_MAP[digraph];
+                return (
+                  <button
+                    key={digraph}
+                    className={`alphabet-card ${detail.colorClass} alphabet-card-digraph`}
+                    onClick={() => speakPhonic(digraph)}
+                    title={`Escuchar dígrafo ${digraph} (${detail.word})`}
+                  >
+                    <span className="alphabet-letter">{digraph}</span>
+                    <span className="alphabet-emoji">{detail.image}</span>
+                    <span className="alphabet-word">{detail.word}</span>
+                    <span className="alphabet-ipa">{detail.ipa}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <h4 style={{ marginTop: '20px' }}>Vocales en Inglés ({ENGLISH_VOWELS.length}):</h4>
             <div className="alphabet-grid">
               {ENGLISH_VOWELS.map((letter) => {
                 const detail = ENGLISH_PHONIC_MAP[letter];
