@@ -1,58 +1,47 @@
 import { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthModal } from './components/AuthModal';
+import { MaterialPreviewModal } from './components/MaterialPreviewModal';
+import { UserProfile } from './components/UserProfile';
+import {
+  ENGLISH_VOWELS,
+  ENGLISH_CONSONANTS,
+  ENGLISH_PHONIC_MAP,
+  SUGGESTED_ENGLISH_WORDS,
+  findWordIllustration
+} from './data/englishPhonics';
 
-interface PhonicDetail {
-  letter: string;
-  word: string;
-  image: string;
-  colorClass: string;
-  ipa: string;
-}
+function PhonicsMainApp() {
+  const {
+    user,
+    setIsAuthModalOpen,
+    setIsProfileOpen,
+    setIsMaterialModalOpen,
+    currentMaterialItems,
+    addToMaterial,
+    saveWordToProfile
+  } = useAuth();
 
-const VOCALES = ['A', 'E', 'I', 'O', 'U'];
-const CONSONANTES = ['M', 'P', 'S', 'L', 'T'];
-
-const PHONIC_MAP: Record<string, PhonicDetail> = {
-  A: { letter: 'A', word: 'avión', image: '✈️', colorClass: 'gradient-sky', ipa: '/a/' },
-  E: { letter: 'E', word: 'estrella', image: '⭐', colorClass: 'gradient-yellow', ipa: '/e/' },
-  I: { letter: 'I', word: 'isla', image: '🏝️', colorClass: 'gradient-teal', ipa: '/i/' },
-  O: { letter: 'O', word: 'ojo', image: '👁️', colorClass: 'gradient-slate', ipa: '/o/' },
-  U: { letter: 'U', word: 'uvas', image: '🍇', colorClass: 'gradient-purple', ipa: '/u/' },
-  M: { letter: 'M', word: 'mano', image: '✋', colorClass: 'gradient-peach', ipa: '/m/' },
-  P: { letter: 'P', word: 'pato', image: '🦆', colorClass: 'gradient-amber', ipa: '/p/' },
-  S: { letter: 'S', word: 'sol', image: '☀️', colorClass: 'gradient-orange', ipa: '/s/' },
-  L: { letter: 'L', word: 'luna', image: '🌙', colorClass: 'gradient-blue', ipa: '/l/' },
-  T: { letter: 'T', word: 'taza', image: '☕', colorClass: 'gradient-brown', ipa: '/t/' }
-};
-
-const PHONETIC_SOUNDS: Record<string, string> = {
-  A: 'a',
-  E: 'e',
-  I: 'i',
-  O: 'o',
-  U: 'u',
-  M: 'mmm',
-  P: 'pe',
-  S: 'sss',
-  L: 'ele',
-  T: 'te'
-};
-
-const SUGGESTED_WORDS = ['MAPA', 'SOPA', 'LUPA', 'PELO', 'PATO', 'MESA', 'SOL', 'LATA', 'PILA', 'PUMA'];
-
-function App() {
-  const [currentWord, setCurrentWord] = useState<string>('MAPA');
+  const [currentWord, setCurrentWord] = useState<string>('MAP');
   const [activeSpellingIndex, setActiveSpellingIndex] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const [toastMsg, setToastMsg] = useState<string>('');
   const [showPhonicsSheet, setShowPhonicsSheet] = useState<boolean>(false);
 
-  // Voice synthesis helper
-  const speak = (text: string, rate = 1.0): Promise<void> => {
+  // Helper Toast Alert
+  const showNotification = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 3000);
+  };
+
+  // English Voice synthesis helper
+  const speak = (text: string, rate = 0.85): Promise<void> => {
     return new Promise((resolve) => {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-ES';
+        utterance.lang = 'en-US'; // English phonics & speech
         utterance.rate = rate;
         utterance.onend = () => resolve();
         utterance.onerror = () => resolve();
@@ -66,12 +55,13 @@ function App() {
   };
 
   const speakLetter = async (letter: string) => {
-    const sound = PHONETIC_SOUNDS[letter] || letter;
-    await speak(sound, 0.45);
+    const phonic = ENGLISH_PHONIC_MAP[letter];
+    const soundText = phonic ? phonic.soundHint : letter;
+    await speak(soundText, 0.6);
   };
 
   const speakFullWord = async (word: string) => {
-    await speak(word, 0.75);
+    await speak(word, 0.8);
   };
 
   const handleKeyPress = async (letter: string) => {
@@ -99,7 +89,7 @@ function App() {
   const handlePlayFullWord = async () => {
     if (!currentWord || isPlaying) return;
     setIsPlaying(true);
-    setActiveSpellingIndex(-1); // Highlight all letters
+    setActiveSpellingIndex(-1);
     await speakFullWord(currentWord);
     setActiveSpellingIndex(null);
     setIsPlaying(false);
@@ -118,7 +108,6 @@ function App() {
       await delay(500);
     }
 
-    // Pause briefly
     setActiveSpellingIndex(null);
     await delay(300);
 
@@ -133,10 +122,9 @@ function App() {
 
   const showError = (msg: string) => {
     setErrorMsg(msg);
-    const timer = setTimeout(() => {
+    setTimeout(() => {
       setErrorMsg((prev) => (prev === msg ? '' : prev));
     }, 3000);
-    return () => clearTimeout(timer);
   };
 
   const handleLoadWord = async (word: string) => {
@@ -149,9 +137,38 @@ function App() {
     setIsPlaying(false);
   };
 
-  // Keyboard support
+  // Add current word to 2x4 Material Sheet
+  const handleAddToMaterial = () => {
+    if (!currentWord) return;
+    const illustration = findWordIllustration(currentWord);
+    const phonicsBreakdown = currentWord.split('').map((l) => l.toUpperCase());
+
+    const success = addToMaterial(currentWord, illustration, phonicsBreakdown);
+    if (success) {
+      showNotification(`✅ "${currentWord.toUpperCase()}" añadida al Material 2x4 (${currentMaterialItems.length + 1}/8)`);
+    } else {
+      showError('⚠️ El material ya tiene el límite de 8 palabras (Formato 2x4 completo). Haz clic en Previsualizar para ver o imprimir.');
+    }
+  };
+
+  // Save current word to user profile
+  const handleSaveToProfile = async () => {
+    if (!currentWord) return;
+    const illustration = findWordIllustration(currentWord);
+    const phonicsBreakdown = currentWord.split('').map((l) => l.toUpperCase());
+    const ok = await saveWordToProfile(currentWord, phonicsBreakdown, illustration);
+    if (ok) {
+      showNotification(`⭐ "${currentWord}" guardada en tu colección de usuario.`);
+    }
+  };
+
+  // Keyboard support for physical keyboard typing
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept typing if focus is inside an input/textarea
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+        return;
+      }
       if (isPlaying) return;
 
       if (e.key === 'Backspace') {
@@ -162,10 +179,8 @@ function App() {
         handleClear();
       } else {
         const char = e.key.toUpperCase();
-        if (VOCALES.includes(char) || CONSONANTES.includes(char)) {
+        if (ENGLISH_VOWELS.includes(char) || ENGLISH_CONSONANTS.includes(char)) {
           handleKeyPress(char);
-        } else if (/^[a-zA-ZáéíóúñÁÉÍÓÚÑ]$/.test(e.key)) {
-          showError(`La letra "${e.key.toUpperCase()}" no está en el conjunto activo.`);
         }
       }
     };
@@ -178,7 +193,7 @@ function App() {
 
   return (
     <>
-      {/* Background decoration */}
+      {/* Background grid */}
       <div className="bg-grid"></div>
 
       {/* Navbar */}
@@ -186,35 +201,75 @@ function App() {
         <div className="container navbar-content">
           <a href="#" className="logo-wrapper">
             <div className="logo-icon">🍎</div>
-            <span className="logo-text">Teacher<span>Phonics</span></span>
+            <span className="logo-text">Teacher<span>Phonics</span> <small className="lang-badge">English Phonics</small></span>
           </a>
+
           <div className="navbar-actions">
+            {/* Material 2x4 Button Badge */}
+            <button
+              className="btn btn-material-nav"
+              onClick={() => setIsMaterialModalOpen(true)}
+              title="Ver o imprimir tu ficha didáctica de 2x4"
+            >
+              📄 Ficha 2x4 <span className="material-count-pill">{currentMaterialItems.length}/8</span>
+            </button>
+
+            {/* Coffee link */}
             <a 
-              href="https://www.buymeacoffee.com/" 
+              href="https://buymeacoffee.com/aarribas" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="btn-coffee-nav"
             >
               <span className="coffee-emoji">☕</span> Invítanos a un café
             </a>
-            <a href="#sandbox" className="btn btn-secondary btn-nav-demo">Pizarra de Escritura</a>
+
+            {/* Auth / Profile Pill */}
+            {user ? (
+              <button
+                className="user-profile-pill"
+                onClick={() => setIsProfileOpen(true)}
+                title="Abrir Mi Panel de Usuario"
+              >
+                <span className="user-pill-avatar">{user.avatar}</span>
+                <span className="user-pill-name">{user.name}</span>
+                <span className="user-pill-badge">{user.role}</span>
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary btn-nav-login"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
+                🔐 Iniciar Sesión / Demo
+              </button>
+            )}
           </div>
         </div>
       </nav>
 
+      {/* Notification Banner */}
+      {toastMsg && (
+        <div className="toast-banner">
+          {toastMsg}
+        </div>
+      )}
+
       {/* Hero Section */}
       <header className="hero container">
         <div className="hero-content">
-          <div className="badge">Pizarra de Fonética Interactiva</div>
+          <div className="badge">🇬🇧 Pizarra de Phonics en Inglés • Generador de Materiales 2x4</div>
           <h1 className="hero-title">
-            Aprende a leer y escribir jugando con <span>fonemas</span>
+            Aprende a leer en inglés creando <span>fichas de phonics</span>
           </h1>
           <p className="hero-subtitle">
-            Forma tus primeras palabras en español utilizando las vocales y consonantes principales. 
-            Escribe con el teclado, escucha cada sonido individual y descubre cómo se unen para leer.
+            Combina los sonidos del abecedario en inglés (A-Z), escucha la pronunciación fonética nativa y 
+            crea tus propias fichas de trabajo en formato 2x4 (8 palabras ilustradas) listas para imprimir o guardar.
           </p>
           <div className="hero-actions">
-            <a href="#sandbox" className="btn btn-primary">¡Comenzar a escribir ahora! ✍️</a>
+            <a href="#sandbox" className="btn btn-primary">¡Comenzar a escribir en inglés! ✍️</a>
+            <button className="btn btn-secondary" onClick={() => setIsMaterialModalOpen(true)}>
+              👁️ Previsualizar Ficha 2x4 ({currentMaterialItems.length}/8)
+            </button>
           </div>
         </div>
       </header>
@@ -232,25 +287,31 @@ function App() {
                 <div className="slate-container">
                   <div className="slate-header">
                     <div className="slate-header-left">
-                      <span className="slate-title">Mi Pizarra de Escritura</span>
-                      <span className="slate-subtitle">Presiona las letras para oír su sonido</span>
+                      <span className="slate-title">Mi Pizarra de Escritura (English Phonics)</span>
+                      <span className="slate-subtitle">Haz clic en las letras o usa tu teclado para escuchar los sonidos en inglés</span>
                     </div>
                     <button
                       className={`btn-toggle-sheet ${showPhonicsSheet ? 'active' : ''}`}
                       onClick={() => setShowPhonicsSheet(!showPhonicsSheet)}
-                      title={showPhonicsSheet ? 'Ocultar Phonics' : 'Ver Phonics'}
+                      title={showPhonicsSheet ? 'Ocultar Phonics Sheet' : 'Ver Phonics Sheet A-Z'}
                     >
-                      📋 {showPhonicsSheet ? 'Ocultar Phonics' : 'Ver Phonics'}
+                      📋 {showPhonicsSheet ? 'Ocultar Phonics' : 'Ver Phonics A-Z'}
                     </button>
                   </div>
 
                   <div className="slate-content">
                     {currentWord.length === 0 ? (
                       <div className="slate-placeholder">
-                        <span>Escribe algo usando el teclado de abajo o tu teclado físico...</span>
+                        <span>Escribe una palabra en inglés usando el teclado de abajo (ej: MAP, CAT, DOG, SUN)...</span>
                       </div>
                     ) : (
                       <div className="slate-slate-wrap">
+                        {/* Current Word Match Illustration */}
+                        <div className="current-word-illustration-badge">
+                          <span className="word-emoji">{findWordIllustration(currentWord)}</span>
+                          <span className="word-label">{currentWord}</span>
+                        </div>
+
                         {/* Letter cards */}
                         <div className="slate-letters">
                           {currentWord.split('').map((letter, idx) => {
@@ -261,7 +322,7 @@ function App() {
                                 className={`letter-card ${isLetterActive ? 'active-spelling' : ''}`}
                                 onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
                                 disabled={isPlaying}
-                                title={`Escuchar sonido de ${letter}`}
+                                title={`Escuchar sonido fonético de /${letter.toLowerCase()}/`}
                               >
                                 <span className="letter-char">{letter}</span>
                                 <span className="letter-audio-icon">🔊</span>
@@ -273,7 +334,7 @@ function App() {
                         {/* Phonic Images Row */}
                         <div className="slate-images-row">
                           {currentWord.split('').map((letter, idx) => {
-                            const phonic = PHONIC_MAP[letter.toUpperCase()];
+                            const phonic = ENGLISH_PHONIC_MAP[letter.toUpperCase()];
                             if (!phonic) return null;
                             const isLetterActive = activeSpellingIndex === idx || activeSpellingIndex === -1;
                             return (
@@ -282,11 +343,11 @@ function App() {
                                 className={`phonic-image-card ${phonic.colorClass} ${isLetterActive ? 'active-spelling' : ''}`}
                                 onClick={() => !isPlaying && speakLetter(letter.toUpperCase())}
                                 disabled={isPlaying}
-                                title={`${letter.toUpperCase()} de ${phonic.word}`}
+                                title={`${letter.toUpperCase()} for ${phonic.word}`}
                               >
                                 <span className="phonic-symbol">{phonic.image}</span>
                                 <span className="phonic-word-label">{phonic.word}</span>
-                                <span className="phonic-association">{letter.toLowerCase()}</span>
+                                <span className="phonic-association">{phonic.ipa}</span>
                               </button>
                             );
                           })}
@@ -302,23 +363,42 @@ function App() {
                     </div>
                   )}
 
-                  {/* Action Buttons for spelling/controls */}
+                  {/* Action Buttons for spelling/controls & Material 2x4 creation */}
                   <div className="slate-actions">
                     <button 
                       className="btn btn-primary btn-action" 
                       onClick={handlePlayFullWord}
                       disabled={isPlaying || currentWord.length === 0}
                     >
-                      🔊 Escuchar Palabra
+                      🔊 Escuchar Palabra (English)
                     </button>
                     
                     <button 
                       className="btn btn-secondary btn-action btn-spell" 
                       onClick={handleSpellWord}
                       disabled={isPlaying || currentWord.length === 0}
-                      title="Escucha los sonidos letra a letra y luego la palabra completa (Blending)"
+                      title="Deletrear por fonemas de inglés (Blending)"
                     >
                       🧩 Deletrear por Sonidos
+                    </button>
+
+                    {/* NEW: Add to 2x4 Material File Button */}
+                    <button
+                      className="btn btn-material-add"
+                      onClick={handleAddToMaterial}
+                      disabled={isPlaying || currentWord.length === 0}
+                      title="Añadir esta palabra con su ilustración a la ficha 2x4"
+                    >
+                      ➕ Añadir al Material (2x4) <span className="btn-badge">{currentMaterialItems.length}/8</span>
+                    </button>
+
+                    <button
+                      className="btn btn-secondary btn-star"
+                      onClick={handleSaveToProfile}
+                      disabled={isPlaying || currentWord.length === 0}
+                      title="Guardar palabra en tu colección de usuario"
+                    >
+                      ⭐ Guardar en Mi Perfil
                     </button>
 
                     <div className="slate-edit-controls">
@@ -342,16 +422,16 @@ function App() {
                   </div>
                 </div>
 
-                {/* Virtual Keyboard */}
+                {/* Virtual Keyboard with All 26 English Letters */}
                 <div className="keyboard-container">
-                  <h3 className="keyboard-title">Tus Letras Mágicas</h3>
+                  <h3 className="keyboard-title">Abecedario en Inglés (A - Z)</h3>
                   
                   {/* Vowels */}
                   <div className="keyboard-row-wrapper">
-                    <span className="row-label vocal-label">Vocales:</span>
+                    <span className="row-label vocal-label">Vocales ({ENGLISH_VOWELS.length}):</span>
                     <div className="keyboard-row">
-                      {VOCALES.map((letter) => {
-                        const phonic = PHONIC_MAP[letter];
+                      {ENGLISH_VOWELS.map((letter) => {
+                        const phonic = ENGLISH_PHONIC_MAP[letter];
                         return (
                           <button
                             key={letter}
@@ -369,10 +449,10 @@ function App() {
 
                   {/* Consonants */}
                   <div className="keyboard-row-wrapper" style={{ marginTop: '16px' }}>
-                    <span className="row-label consonant-label">Consonantes:</span>
-                    <div className="keyboard-row">
-                      {CONSONANTES.map((letter) => {
-                        const phonic = PHONIC_MAP[letter];
+                    <span className="row-label consonant-label">Consonantes ({ENGLISH_CONSONANTS.length}):</span>
+                    <div className="keyboard-row keyboard-grid-consonants">
+                      {ENGLISH_CONSONANTS.map((letter) => {
+                        const phonic = ENGLISH_PHONIC_MAP[letter];
                         return (
                           <button
                             key={letter}
@@ -390,40 +470,43 @@ function App() {
 
                   {/* Instructions */}
                   <p className="keyboard-instructions">
-                    💡 <em>También puedes escribir usando las teclas correspondientes de tu teclado físico.</em>
+                    💡 <em>Escribe palabras en inglés con tu teclado físico o pulsando los botones de arriba.</em>
                   </p>
                 </div>
 
                 {/* Suggested Words */}
                 <div className="suggestions-container">
-                  <h4 className="suggestions-title">Palabras sugeridas para practicar:</h4>
+                  <h4 className="suggestions-title">Palabras CVC sugeridas en inglés:</h4>
                   <div className="suggestions-list">
-                    {SUGGESTED_WORDS.map((word) => (
-                      <button
-                        key={word}
-                        className="suggestion-badge"
-                        onClick={() => handleLoadWord(word)}
-                        disabled={isPlaying}
-                      >
-                        {word.toLowerCase()} <span>➔</span>
-                      </button>
-                    ))}
+                    {SUGGESTED_ENGLISH_WORDS.map((word) => {
+                      const img = findWordIllustration(word);
+                      return (
+                        <button
+                          key={word}
+                          className="suggestion-badge"
+                          onClick={() => handleLoadWord(word)}
+                          disabled={isPlaying}
+                        >
+                          <span>{img}</span> {word} <span>➔</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
               </div>
             </div>
 
-            {/* Right Column: Classroom Phonics Sheet */}
+            {/* Right Column: Classroom Phonics Sheet A-Z */}
             <div className="workspace-sheet">
               <div className="phonics-sheet card-glass">
                 <div className="sheet-header">
                   <span className="sheet-pin">📌</span>
                   <div className="sheet-title-group">
-                    <h3 className="sheet-title">Ficha de Phonics</h3>
-                    <span className="sheet-subtitle">Sonidos Activos de la Demo</span>
+                    <h3 className="sheet-title">English Phonics Chart</h3>
+                    <span className="sheet-subtitle">Sonidos A - Z completos</span>
                   </div>
-                  <span className="sheet-level-badge">Fase 1 (es)</span>
+                  <span className="sheet-level-badge">English CVC</span>
                   <button 
                     className="sheet-close-btn"
                     onClick={() => setShowPhonicsSheet(false)}
@@ -435,19 +518,19 @@ function App() {
                 
                 <div className="sheet-body">
                   <p className="sheet-intro">
-                    Esta es tu hoja de referencia actual. Haz clic en cualquier fonema para escuchar su sonido individual.
+                    Haz clic en cualquier fonema para escuchar su pronunciación nativa en inglés.
                   </p>
                   
                   <div className="sheet-grid">
-                    {Object.values(PHONIC_MAP).map((phonic) => {
-                      const isVoc = VOCALES.includes(phonic.letter);
+                    {Object.values(ENGLISH_PHONIC_MAP).map((phonic) => {
+                      const isVoc = ENGLISH_VOWELS.includes(phonic.letter);
                       return (
                         <button
                           key={phonic.letter}
                           className={`sheet-card ${phonic.colorClass}`}
                           onClick={() => !isPlaying && speakLetter(phonic.letter)}
                           disabled={isPlaying}
-                          title={`Reproducir fonema /${phonic.letter.toLowerCase()}/`}
+                          title={`Listen sound for ${phonic.letter} (${phonic.word})`}
                         >
                           <div className="sheet-card-top">
                             <span className={`sheet-letter ${isVoc ? 'txt-vocal' : 'txt-consonant'}`}>
@@ -464,7 +547,7 @@ function App() {
                   
                   <div className="sheet-footer">
                     <p className="sheet-note">
-                      ✍️ <em>Escribe palabras combinando estos sonidos (ej: sopa, mapa, lupa, pato).</em>
+                      ✍️ <em>Escribe palabras como MAP, CAT, DOG, SUN, BUS, FOX, PIG para crear tu ficha 2x4.</em>
                     </p>
                   </div>
                 </div>
@@ -486,7 +569,7 @@ function App() {
               Desarrollado por <strong>Adrián Arribas</strong> y <strong>Javier Razquin</strong>.
             </p>
             <a 
-              href="https://www.buymeacoffee.com/" 
+              href="https://buymeacoffee.com/aarribas" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="btn-coffee-footer-icon"
@@ -500,8 +583,19 @@ function App() {
           </p>
         </div>
       </footer>
+
+      {/* Modals & Profile Section */}
+      <AuthModal />
+      <MaterialPreviewModal />
+      <UserProfile onLoadWordToSlate={(word) => handleLoadWord(word)} />
     </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <PhonicsMainApp />
+    </AuthProvider>
+  );
+}
