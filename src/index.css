@@ -1474,6 +1474,175 @@ p {
   gap: 8px;
 }
 
+/* ==========================================================================
+   CLASSROOM PHONICS SHEET RIGHT PANEL STYLES
+   ========================================================================== */
+
+.sandbox-workspace {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 100%;
+}
+
+.sandbox-workspace .workspace-editor {
+  flex: 1;
+  min-width: 0;
+}
+
+.workspace-sheet {
+  width: 360px;
+  flex-shrink: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sandbox-workspace.hide-sheet .workspace-sheet {
+  width: 0px;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateX(60px);
+  pointer-events: none;
+}
+
+.phonics-sheet {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.sheet-pin {
+  font-size: 1.4rem;
+}
+
+.sheet-title-group h3 {
+  font-size: 1.1rem;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.sheet-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.sheet-level-badge {
+  font-size: 0.7rem;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+.sheet-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.sheet-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
+}
+
+.sheet-intro {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sheet-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: #ffffff;
+}
+
+.sheet-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.sheet-card-digraph {
+  border: 2px solid #f59e0b;
+}
+
+.sheet-card-top {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.sheet-letter {
+  font-size: 1.1rem;
+  font-weight: 900;
+  font-family: var(--font-heading);
+}
+
+.sheet-ipa {
+  font-size: 0.62rem;
+  opacity: 0.85;
+}
+
+.sheet-image {
+  font-size: 1.5rem;
+  margin: 2px 0;
+}
+
+.sheet-word {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.sheet-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.sheet-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 /* Slate Buttons: Material & Star */
 .btn-material-add {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);

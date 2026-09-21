@@ -2,6 +2,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, LoginCredentials, RegisterData, MaterialItem, MaterialSheet2x4 } from '../types/user';
 import { authService } from '../services/authService';
 
+const DEFAULT_STARTER_ITEMS: MaterialItem[] = [
+  { id: 'item-init-1', word: 'PHONE', illustration: '📞', phonics: ['PH', 'O', 'N', 'E'] },
+  { id: 'item-init-2', word: 'TOUCH', illustration: '👆', phonics: ['T', 'OU', 'CH'] },
+  { id: 'item-init-3', word: 'MAP', illustration: '🗺️', phonics: ['M', 'A', 'P'] },
+  { id: 'item-init-4', word: 'SUN', illustration: '☀️', phonics: ['S', 'U', 'N'] }
+];
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -21,6 +28,7 @@ interface AuthContextType {
   removeFromMaterial: (itemId: string) => void;
   clearMaterial: () => void;
   loadSheetToMaterial: (sheet: MaterialSheet2x4) => void;
+  loadDefaultSampleItems: () => void;
   saveCurrentSheetToUser: (title?: string) => Promise<boolean>;
 
   // Auth actions
@@ -44,8 +52,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState<boolean>(false);
 
-  // Material 2x4 State (max 8 items)
-  const [currentMaterialItems, setCurrentMaterialItems] = useState<MaterialItem[]>([]);
+  // Material 2x4 State (max 8 items) - Pre-filled with starter items
+  const [currentMaterialItems, setCurrentMaterialItems] = useState<MaterialItem[]>(DEFAULT_STARTER_ITEMS);
 
   // Initialize Auth
   useEffect(() => {
@@ -141,6 +149,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsMaterialModalOpen(true);
   };
 
+  const loadDefaultSampleItems = () => {
+    const fullSample: MaterialItem[] = [
+      { id: 'sample-1', word: 'PHONE', illustration: '📞', phonics: ['PH', 'O', 'N', 'E'] },
+      { id: 'sample-2', word: 'TOUCH', illustration: '👆', phonics: ['T', 'OU', 'CH'] },
+      { id: 'sample-3', word: 'CAT', illustration: '🐱', phonics: ['C', 'A', 'T'] },
+      { id: 'sample-4', word: 'DOG', illustration: '🐶', phonics: ['D', 'O', 'G'] },
+      { id: 'sample-5', word: 'SUN', illustration: '☀️', phonics: ['S', 'U', 'N'] },
+      { id: 'sample-6', word: 'SHIP', illustration: '🚢', phonics: ['SH', 'I', 'P'] },
+      { id: 'sample-7', word: 'CHIP', illustration: '🍟', phonics: ['CH', 'I', 'P'] },
+      { id: 'sample-8', word: 'DUCK', illustration: '🦆', phonics: ['D', 'U', 'CK'] }
+    ];
+    setCurrentMaterialItems(fullSample);
+  };
+
   const saveCurrentSheetToUser = async (title?: string): Promise<boolean> => {
     if (!user) {
       setIsAuthModalOpen(true);
@@ -182,6 +204,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removeFromMaterial,
         clearMaterial,
         loadSheetToMaterial,
+        loadDefaultSampleItems,
         saveCurrentSheetToUser,
         login,
         loginAsDemo,

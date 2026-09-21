@@ -8,6 +8,7 @@ export const MaterialPreviewModal: React.FC = () => {
     currentMaterialItems,
     removeFromMaterial,
     clearMaterial,
+    loadDefaultSampleItems,
     saveCurrentSheetToUser
   } = useAuth();
 
@@ -75,7 +76,7 @@ export const MaterialPreviewModal: React.FC = () => {
               className="sheet-title-input"
               value={sheetTitle}
               onChange={(e) => setSheetTitle(e.target.value)}
-              placeholder="Ej: Palabras CVC 2x4 - Phonics 1"
+              placeholder="Ej: Palabras CVC y Dígrafos 2x4"
             />
           </div>
 
@@ -85,6 +86,9 @@ export const MaterialPreviewModal: React.FC = () => {
             </button>
             <button className="btn btn-secondary" onClick={handleSaveSheet} title="Guardar en tu perfil de usuario">
               💾 Guardar en Mi Perfil
+            </button>
+            <button className="btn btn-secondary" onClick={loadDefaultSampleItems} title="Cargar 8 palabras de ejemplo">
+              ⚡ Ejemplo 8 Palabras
             </button>
             <button className="btn btn-danger-outline" onClick={clearMaterial} title="Vaciar la ficha">
               🧹 Limpiar
@@ -104,7 +108,7 @@ export const MaterialPreviewModal: React.FC = () => {
           <header className="printable-sheet-header">
             <div className="sheet-branding">
               <span className="brand-logo">🍎 TeacherPhonics</span>
-              <span className="brand-tagline">English Phonics Worksheet (2x4)</span>
+              <span className="brand-tagline">English Phonics & Digraphs Worksheet (2x4)</span>
             </div>
             <h1 className="printable-sheet-title">{sheetTitle}</h1>
             <div className="sheet-student-info">

@@ -30,7 +30,7 @@ function PhonicsMainApp() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [toastMsg, setToastMsg] = useState<string>('');
-  const [showPhonicsSheet, setShowPhonicsSheet] = useState<boolean>(false);
+  const [showPhonicsSheet, setShowPhonicsSheet] = useState<boolean>(true);
 
   // Helper Toast Alert
   const showNotification = (msg: string) => {
